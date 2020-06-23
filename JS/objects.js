@@ -3,7 +3,7 @@ const searchBtn = document.getElementById("search-btn");
 
 const movies = [];
 
-const renderMovies = ()=>{
+const renderMovies = (filter = '')=>{
 
     const movieList = document.getElementById('movie-list')
 
@@ -14,38 +14,30 @@ const renderMovies = ()=>{
         movieList.classList.add('visible');
     }
     
-    movieList.innerHTML = `
-        
+    movieList.innerHTML = ` 
         <div class= "movie-element__info">
             <h2>${title}</h2>  
         </div>
     `;
+    
+    const filteredMovies = !filter 
+    ? movies
+    : movies.filter(movie => movie.info.title.includes(filter));
   
-    movies.forEach((movie)=>{
+    filteredMovies.forEach((movie)=>{
         const movieEl =document.createElement('li');
-        movieEl.textContent = movie.info.title;
+        let {getoFormatedTitle} = movie;
+        getoFormatedTitle = getoFormatedTitle.bind(movie);
+        let text = getoFormatedTitle() + " - "
+        for(const key in movie.info){
+            if(key !== 'title'){
+                text = text + `${key}: ${movie.info[key]}`
+            }
+        }
+        movieEl.textContent = text;
         movieList.append(movieEl);
     })  
 }
-
-// const renderMovies = ()=>{
-//     const movieList = document.getElementById('movie-list')
-
-//     if(movies.length === 0){
-//         movieList.classList.remove('visible');
-//         return;
-//     }else{
-//         movieList.classList.add('visible');
-//     }
-//     movieList.innerHTML = '';
-
-//     movies.forEach((movie)=>{
-//         const movieEl =document.createElement('li');
-//         movieEl.textContent = movie.info.title;
-//         movieList.append(movieEl);
-//     })
-// }
-
 
 const addMovieHandler = ()=>{
         const title = document.getElementById('title').value;
@@ -65,10 +57,20 @@ const addMovieHandler = ()=>{
             title,
             [extraName]: extraValue,          
         },
-        id: Math.random()
+        id: Math.random(),
+        getoFormatedTitle(){
+            return  this.info.title.toUpperCase(); 
+        }
     }   
         movies.push(newMovie);
         renderMovies();   
 }
 
+const searchMovieHandler = ()=>{
+const filterTerm = document.getElementById('filter-title').value;
+renderMovies(filterTerm);
+
+}
+
 addMovieBtn.addEventListener('click', addMovieHandler);
+searchBtn.addEventListener('click', searchMovieHandler);
